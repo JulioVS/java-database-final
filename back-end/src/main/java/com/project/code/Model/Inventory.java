@@ -62,6 +62,9 @@ public class Inventory {
    // 7. Create a constructor:
    // - Add a constructor that takes a Product, Store, and Integer stockLevel to
    // initialize the Inventory object.
+   public Inventory() {
+   }
+
    public Inventory(Product product, Store store, Integer stockLevel) {
       this.product = product;
       this.store = store;
