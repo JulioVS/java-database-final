@@ -1,9 +1,9 @@
 package com.project.code.Model;
 
-
 import java.util.List;
 
 public class PlaceOrderRequestDTO {
+
     private Long storeId;
     private String customerName;
     private String customerEmail;
