@@ -22,6 +22,7 @@ import com.project.code.Service.ServiceClass;
 
 @RestController
 @RequestMapping("/inventory")
+
 public class InventoryController {
 
     // 1. Set Up the Controller Class:
