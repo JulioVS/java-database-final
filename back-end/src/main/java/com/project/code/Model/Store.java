@@ -25,16 +25,16 @@ public class Store {
     // - Type: private String
     // - This field cannot be empty, use the @NotNull annotation to enforce this
     // rule.
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Name cannot be null")
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
     // 3. Add 'address' field:
     // - Type: private String
     // - This field cannot be empty, use the @NotNull and @NotBlank annotations to
     // enforce this rule.
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Address cannot be null")
+    @NotBlank(message = "Address cannot be blank")
     private String address;
 
     // 4. Add relationships:
@@ -43,16 +43,16 @@ public class Store {
     // with Inventory.
     // - Use @JsonManagedReference("inventory-store") to manage bidirectional
     // relationships and avoid circular references.
-    @OneToMany(mappedBy = "store")
+    @OneToMany(mappedBy = "store", fetch = FetchType.EAGER)
     @JsonManagedReference("inventory-store")
-    private List<Inventory> inventories;
+    private List<Inventory> inventory;
 
     // 5. Add constructor:
     // - Create a constructor that accepts name and address as parameters to
     // initialize the Store object.
     public Store() {
     }
-    
+
     public Store(String name, String address) {
         this.name = name;
         this.address = address;
@@ -85,6 +85,14 @@ public class Store {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public List<Inventory> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(List<Inventory> inventory) {
+        this.inventory = inventory;
     }
 
 }

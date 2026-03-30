@@ -1,8 +1,8 @@
 package com.project.code.Model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 
 // This is the Review class that represents a review document in MongoDB. 
@@ -128,6 +128,14 @@ public class Review {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
 }

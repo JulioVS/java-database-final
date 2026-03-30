@@ -94,11 +94,32 @@ public class Customer {
         this.phone = phone;
     }
 
+    public List<OrderDetails> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<OrderDetails> orders) {
+        this.orders = orders;
+    }
+
     // 7. Ensure to use proper annotations and validate constraints:
     // - Use @NotNull for fields that cannot be empty like 'name', 'email', and
     // 'phone'.
     // - Make sure you add the correct annotations for entity mapping and
     // relationship management like @Entity, @Id, @GeneratedValue, @OneToMany, and
     // @JsonManagedReference.
+
+    // 8. Constructors:
+    // - Add a default constructor (no-argument constructor) for JPA.
+    // - Add a parameterized constructor to initialize the 'name', 'email', and
+    // 'phone' fields.
+    public Customer() {
+    }
+
+    public Customer(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
 
 }

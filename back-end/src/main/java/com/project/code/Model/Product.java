@@ -25,21 +25,21 @@ public class Product {
     // - Type: private String
     // - This field cannot be empty, use the @NotNull annotation to enforce this
     // rule.
-    @NotNull
+    @NotNull(message = "Name cannot be null")
     private String name;
 
     // 3. Add 'category' field:
     // - Type: private String
     // - This field cannot be empty, use the @NotNull annotation to enforce this
     // rule.
-    @NotNull
+    @NotNull(message = "Category cannot be null")
     private String category;
 
     // 4. Add 'price' field:
     // - Type: private Double
     // - This field cannot be empty, use the @NotNull annotation to enforce this
     // rule.
-    @NotNull
+    @NotNull(message = "Price cannot be null")
     private Double price;
 
     // 5. Add 'sku' field:
@@ -51,7 +51,7 @@ public class Product {
 
     // Example: @Table(name = "product", uniqueConstraints =
     // @UniqueConstraint(columnNames = "sku"))
-    @NotNull
+    @NotNull(message = "SKU cannot be null")
     private String sku;
 
     // 6. Add relationships:
@@ -60,9 +60,9 @@ public class Product {
     // relationship with Inventory.
     // - Use @JsonManagedReference("inventory-product") to manage bidirectional
     // relationships and avoid circular references.
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     @JsonManagedReference("inventory-product")
-    private List<Inventory> inventoryEntries;
+    private List<Inventory> inventory;
 
     // 7. Add @Entity annotation:
     // - Use @Entity above the class name to mark it as a JPA entity.
@@ -108,6 +108,34 @@ public class Product {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public List<Inventory> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(List<Inventory> inventory) {
+        this.inventory = inventory;
+    }
+
+    // 9. Add Constructors:
+    // - Add a no-argument constructor (default constructor).
+    // - Add a parameterized constructor that initializes all fields except 'id' and
+    // 'inventory' (since 'id' is auto-generated and 'inventory' is managed
+    // separately).
+    public Product() {
+    }
+
+    public Product(String name, String category, Double price, String sku) {
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.sku = sku;
+    }
+
+    public String toString() {
+        return "Product [id=" + id + ", name=" + name + ", category=" + category + ", price=" + price + ", sku=" + sku
+                + "]";
     }
 
 }

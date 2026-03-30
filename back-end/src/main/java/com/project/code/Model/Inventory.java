@@ -116,4 +116,9 @@ public class Inventory {
       this.stockLevel = stockLevel;
    }
 
+   public String toString() {
+      return "Inventory [id=" + id + ", product=" + product + ", store=" + store + ", stockLevel=" + stockLevel
+            + "]";
+   }
+
 }
