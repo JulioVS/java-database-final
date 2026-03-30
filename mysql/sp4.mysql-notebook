@@ -1,0 +1,866 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "DB Notebook",
+    "content": "\\about\nUSE inventory;\nSET @target_month = 3;\nSET @target_year = 2025;\nWITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    ),\n\n    filtered_orders_expanded AS (\n        SELECT fo.*, oi.price, oi.quantity, oi.product_id, p.category, p.name\n            FROM filtered_orders fo \n            INNER JOIN order_item oi \n            ON fo.id = oi.order_id\n            INNER JOIN product p \n            ON oi.product_id = p.id\n    ),\n\n    sum_by_store_and_product AS (\n        SELECT  name as product_name, \n                store_id,\n                SUM(quantity) as total_quantity_sold, \n                ROUND(SUM(quantity * price),2) as total_sales\n            FROM filtered_orders_expanded \n            GROUP BY store_id, name\n            ORDER BY store_id ASC, total_quantity_sold DESC, name ASC\n    ),\n\n    max_quantity_by_store AS (\n        SELECT store_id, MAX(quantity) as max_quantity\n            FROM filtered_orders_expanded \n            GROUP BY store_id\n            ORDER BY store_id\n    ),\n\n    select_top_sellers AS (\n        SELECT bs.*\n        FROM sum_by_store_and_product bs\n        INNER JOIN max_quantity_by_store mq\n        ON bs.store_id = mq.store_id\n        WHERE bs.total_quantity_sold = mq.max_quantity\n    )\n\nSELECT * FROM select_top_sellers\n;\nDELIMITER $$\n\n-- DROP PROCEDURE GetTopSellingProductByStore $$\n\nCREATE PROCEDURE GetTopSellingProductByStore(IN target_month INT, IN target_year INT)\nBEGIN\n    WITH\n        filtered_orders AS (\n            SELECT *\n                FROM order_details\n                WHERE MONTH(date) = target_month\n                AND YEAR(date) = target_year\n        ),\n\n        filtered_orders_expanded AS (\n            SELECT fo.*, oi.price, oi.quantity, oi.product_id, p.category, p.name\n                FROM filtered_orders fo \n                INNER JOIN order_item oi \n                ON fo.id = oi.order_id\n                INNER JOIN product p \n                ON oi.product_id = p.id\n        ),\n\n        sum_by_store_and_product AS (\n            SELECT  name as product_name, \n                    store_id,\n                    SUM(quantity) as total_quantity_sold, \n                    ROUND(SUM(quantity * price),2) as total_sales\n                FROM filtered_orders_expanded \n                GROUP BY store_id, name\n                ORDER BY store_id ASC, total_quantity_sold DESC, name ASC\n        ),\n\n        max_quantity_by_store AS (\n            SELECT store_id, MAX(quantity) as max_quantity\n                FROM filtered_orders_expanded \n                GROUP BY store_id\n                ORDER BY store_id\n        ),\n\n        select_top_sellers AS (\n            SELECT bs.*\n                FROM sum_by_store_and_product bs\n                INNER JOIN max_quantity_by_store mq\n                ON bs.store_id = mq.store_id\n                WHERE bs.total_quantity_sold = mq.max_quantity\n        )\n\n    SELECT * FROM select_top_sellers;\nEND $$\n\nDELIMITER ;\nCALL GetTopSellingProductByStore(3, 2025);\nCALL GetTopSellingProductByStore(1, 2025);\nCALL GetTopSellingProductByStore(2, 2025);\n",
+    "options": {
+        "tabSize": 4,
+        "indentSize": 4,
+        "insertSpaces": true,
+        "defaultEOL": "LF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": false,
+                "selectionStart": {
+                    "lineNumber": 96,
+                    "column": 1
+                },
+                "position": {
+                    "lineNumber": 96,
+                    "column": 1
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 79,
+                "column": 1
+            },
+            "firstPositionDeltaTop": -5
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 1,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "content": "Welcome to the MySQL Shell - DB Notebook.\n\nPress Cmd+Enter to execute the code block.\n\nExecute \\sql to switch to SQL, \\js to JavaScript and \\ts to TypeScript mode.\nExecute \\help or \\? for help;",
+                            "language": "ansi"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 6
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 2,
+                "end": 2,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "98277c74-1f84-4b78-9a53-a97547e9c961",
+                            "content": "OK, 0 records retrieved in 1.368ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 14
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 14,
+                            "length": 0
+                        },
+                        "contentStart": 13,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 3,
+                "end": 4,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "66a6306b-a2f5-4c07-dcc9-e695ce063def",
+                            "content": "OK, 0 records retrieved in 0.353ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "5b62bc04-4b08-4356-83dc-8f2e74d162e0",
+                            "content": "OK, 0 records retrieved in 0.289ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 22
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 22,
+                            "length": 25
+                        },
+                        "contentStart": 23,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 5,
+                "end": 48,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "624a4dc7-c600-4013-e6cb-d085da934981"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 1310
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "6f3c46ee-5786-4821-f3d0-e3e6ad3631bb",
+                    "resultId": "624a4dc7-c600-4013-e6cb-d085da934981",
+                    "rows": [
+                        {
+                            "0": "Galaxy S21",
+                            "1": 1,
+                            "2": "3",
+                            "3": 89.97
+                        },
+                        {
+                            "0": "iRobot Roomba i7",
+                            "1": 3,
+                            "2": "2",
+                            "3": 99.98
+                        },
+                        {
+                            "0": "Samsung Washing Machine",
+                            "1": 5,
+                            "2": "3",
+                            "3": 59.97
+                        },
+                        {
+                            "0": "Instant Pot Pressure Cooker",
+                            "1": 6,
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Philips Air Purifier",
+                            "1": 6,
+                            "2": "3",
+                            "3": 209.97
+                        },
+                        {
+                            "0": "Apple MacBook Air",
+                            "1": 7,
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Sony WH-1000XM4",
+                            "1": 10,
+                            "2": "2",
+                            "3": 139.98
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "product_name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 7 records retrieved in 1.22ms"
+                    },
+                    "totalRowCount": 7,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "WITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    ),\n\n    filtered_orders_expanded AS (\n        SELECT fo.*, oi.price, oi.quantity, oi.product_id, p.category, p.name\n            FROM filtered_orders fo \n            INNER JOIN order_item oi \n            ON fo.id = oi.order_id\n            INNER JOIN product p \n            ON oi.product_id = p.id\n    ),\n\n    sum_by_store_and_product AS (\n        SELECT  name as product_name, \n                store_id,\n                SUM(quantity) as total_quantity_sold, \n                ROUND(SUM(quantity * price),2) as total_sales\n            FROM filtered_orders_expanded \n            GROUP BY store_id, name\n            ORDER BY store_id ASC, total_quantity_sold DESC, name ASC\n    ),\n\n    max_quantity_by_store AS (\n        SELECT store_id, MAX(quantity) as max_quantity\n            FROM filtered_orders_expanded \n            GROUP BY store_id\n            ORDER BY store_id\n    ),\n\n    select_top_sellers AS (\n        SELECT bs.*\n        FROM sum_by_store_and_product bs\n        INNER JOIN max_quantity_by_store mq\n        ON bs.store_id = mq.store_id\n        WHERE bs.total_quantity_sold = mq.max_quantity\n    )\n\nSELECT * FROM select_top_sellers\n",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 49,
+                "end": 100,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "973a0976-3750-41a3-a148-c9e864c21adf",
+                            "content": "OK, 0 records retrieved in 1.482ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": "$$",
+                        "span": {
+                            "start": 0,
+                            "length": 12
+                        },
+                        "contentStart": 0,
+                        "state": 4
+                    },
+                    {
+                        "delimiter": "$$",
+                        "span": {
+                            "start": 12,
+                            "length": 1626
+                        },
+                        "contentStart": 64,
+                        "state": 3
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1638,
+                            "length": 13
+                        },
+                        "contentStart": 1640,
+                        "state": 4
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 101,
+                "end": 101,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "313fbc97-073b-4eea-aa90-8a3e618ba797"
+                    ]
+                },
+                "currentHeight": 269,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 42
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "6f3c46ee-5786-4821-f3d0-e3e6ad3631bb",
+                    "resultId": "313fbc97-073b-4eea-aa90-8a3e618ba797",
+                    "rows": [
+                        {
+                            "0": "Galaxy S21",
+                            "1": 1,
+                            "2": "3",
+                            "3": 89.97
+                        },
+                        {
+                            "0": "iRobot Roomba i7",
+                            "1": 3,
+                            "2": "2",
+                            "3": 99.98
+                        },
+                        {
+                            "0": "Samsung Washing Machine",
+                            "1": 5,
+                            "2": "3",
+                            "3": 59.97
+                        },
+                        {
+                            "0": "Instant Pot Pressure Cooker",
+                            "1": 6,
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Philips Air Purifier",
+                            "1": 6,
+                            "2": "3",
+                            "3": 209.97
+                        },
+                        {
+                            "0": "Apple MacBook Air",
+                            "1": 7,
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Sony WH-1000XM4",
+                            "1": 10,
+                            "2": "2",
+                            "3": 139.98
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "product_name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 7 records retrieved in 5.67ms"
+                    },
+                    "totalRowCount": 7,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "subIndex": 0,
+                    "sql": "CALL GetTopSellingProductByStore(3, 2025)",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 102,
+                "end": 102,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "822dc60c-4a62-47d6-e12b-de8bf506921c"
+                    ]
+                },
+                "currentHeight": 144,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 42
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "6f3c46ee-5786-4821-f3d0-e3e6ad3631bb",
+                    "resultId": "822dc60c-4a62-47d6-e12b-de8bf506921c",
+                    "rows": [
+                        {
+                            "0": "Google Pixel 6",
+                            "1": 3,
+                            "2": "2",
+                            "3": 179.98
+                        },
+                        {
+                            "0": "Samsung Washing Machine",
+                            "1": 5,
+                            "2": "3",
+                            "3": 199.97
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "product_name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 2 records retrieved in 2.393ms"
+                    },
+                    "totalRowCount": 2,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "subIndex": 0,
+                    "sql": "CALL GetTopSellingProductByStore(1, 2025)",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 103,
+                "end": 103,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "67b1e29f-58ca-404c-8c7c-95fc69460fe6"
+                    ]
+                },
+                "currentHeight": 244,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 42
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "6f3c46ee-5786-4821-f3d0-e3e6ad3631bb",
+                    "resultId": "67b1e29f-58ca-404c-8c7c-95fc69460fe6",
+                    "rows": [
+                        {
+                            "0": "Sony Bravia 4K TV",
+                            "1": 1,
+                            "2": "2",
+                            "3": 59.98
+                        },
+                        {
+                            "0": "Philips Air Purifier",
+                            "1": 6,
+                            "2": "2",
+                            "3": 119.98
+                        },
+                        {
+                            "0": "HP Envy Laptop",
+                            "1": 7,
+                            "2": "3",
+                            "3": 119.97
+                        },
+                        {
+                            "0": "Logitech MX Master 3",
+                            "1": 7,
+                            "2": "3",
+                            "3": 179.97
+                        },
+                        {
+                            "0": "Logitech MX Master 3",
+                            "1": 9,
+                            "2": "2",
+                            "3": 99.98
+                        },
+                        {
+                            "0": "Bose QuietComfort 35 II",
+                            "1": 10,
+                            "2": "2",
+                            "3": 99.98
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "product_name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 6 records retrieved in 2.472ms"
+                    },
+                    "totalRowCount": 6,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "subIndex": 0,
+                    "sql": "CALL GetTopSellingProductByStore(2, 2025)",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 104,
+                "end": 104,
+                "language": "mysql",
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}

@@ -1,0 +1,1655 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "DB Notebook",
+    "content": "\\about\nUSE inventory;\nSET @target_month = 3;\nSET @target_year = 2025;\nSELECT *\n    FROM order_details\n    WHERE MONTH(date) = @target_month\n    AND YEAR(date) = @target_year;\nWITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    )\n\nSELECT *\nFROM filtered_orders;\nWITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    )\n\nSELECT *\n    FROM filtered_orders fo \n    INNER JOIN order_item oi \n    ON fo.id = oi.order_id\n;\nWITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    ),\n\n    filtered_orders_expanded AS (\n        SELECT fo.*, oi.price, oi.quantity, oi.product_id, p.category, p.name\n            FROM filtered_orders fo \n            INNER JOIN order_item oi \n            ON fo.id = oi.order_id\n            INNER JOIN product p \n            ON oi.product_id = p.id\n    ),\n\n    sum_by_category_and_product AS (\n        SELECT  category, \n                name, \n                SUM(quantity) as total_quantity_sold, \n                ROUND(SUM(quantity * price),2) as total_sales\n            FROM filtered_orders_expanded \n            GROUP BY category, name\n            ORDER BY category ASC, total_quantity_sold DESC, name ASC\n    ),\n\n    max_quantity_by_category AS (\n        SELECT category, MAX(quantity) as max_quantity\n            FROM filtered_orders_expanded \n            GROUP BY category\n            ORDER BY category\n    ),\n\n    select_top_sellers AS (\n        SELECT bc.*\n        FROM sum_by_category_and_product bc\n        INNER JOIN max_quantity_by_category mq\n        ON bc.category = mq.category\n        WHERE bc.total_quantity_sold = mq.max_quantity\n    )\n\nSELECT * FROM select_top_sellers\n;\nDELIMITER $$\n\n-- DROP PROCEDURE GetTopSellingProductsByCategory $$\n\nCREATE PROCEDURE GetTopSellingProductsByCategory(IN target_month INT, IN target_year INT)\nBEGIN\n    WITH\n        filtered_orders AS (\n            SELECT *\n                FROM order_details\n                WHERE MONTH(date) = target_month\n                AND YEAR(date) = target_year\n        ),\n\n        filtered_orders_expanded AS (\n            SELECT fo.*, oi.price, oi.quantity, oi.product_id, p.category, p.name\n                FROM filtered_orders fo \n                INNER JOIN order_item oi \n                ON fo.id = oi.order_id\n                INNER JOIN product p \n                ON oi.product_id = p.id\n        ),\n\n        sum_by_category_and_product AS (\n            SELECT  category, \n                    name, \n                    SUM(quantity) as total_quantity_sold, \n                    ROUND(SUM(quantity * price),2) as total_sales\n                FROM filtered_orders_expanded \n                GROUP BY category, name\n                ORDER BY category ASC, total_quantity_sold DESC, name ASC\n        ),\n\n        max_quantity_by_category AS (\n            SELECT category, MAX(quantity) as max_quantity\n                FROM filtered_orders_expanded \n                GROUP BY category\n                ORDER BY category\n        ),\n\n        select_top_sellers AS (\n            SELECT bc.*\n                FROM sum_by_category_and_product bc\n                INNER JOIN max_quantity_by_category mq\n                ON bc.category = mq.category\n                WHERE bc.total_quantity_sold = mq.max_quantity\n        )\n\n    SELECT * FROM select_top_sellers;\nEND $$\n\nDELIMITER ;\n\nCALL GetTopSellingProductsByCategory(3, 2025);\nCALL GetTopSellingProductsByCategory(1, 2025);\nCALL GetTopSellingProductsByCategory(2, 2025);\n",
+    "options": {
+        "tabSize": 4,
+        "indentSize": 4,
+        "insertSpaces": true,
+        "defaultEOL": "LF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": false,
+                "selectionStart": {
+                    "lineNumber": 79,
+                    "column": 1
+                },
+                "position": {
+                    "lineNumber": 79,
+                    "column": 1
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 54,
+                "column": 1
+            },
+            "firstPositionDeltaTop": -12
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 1,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "content": "Welcome to the MySQL Shell - DB Notebook.\n\nPress Cmd+Enter to execute the code block.\n\nExecute \\sql to switch to SQL, \\js to JavaScript and \\ts to TypeScript mode.\nExecute \\help or \\? for help;",
+                            "language": "ansi"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 6
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 2,
+                "end": 2,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "c4253487-7525-47d5-984e-ff690662fd02",
+                            "content": "OK, 0 records retrieved in 0.402ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 14
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 3,
+                "end": 4,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "eb445e97-02f8-4080-e50d-259dc32e85d2",
+                            "content": "OK, 0 records retrieved in 0.395ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "49cab9d9-4819-44fa-cb51-79b0a0b8f718",
+                            "content": "OK, 0 records retrieved in 0.388ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 22
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 22,
+                            "length": 25
+                        },
+                        "contentStart": 23,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 5,
+                "end": 8,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "18958624-30f4-48aa-dc92-eebe3e88af7a"
+                    ]
+                },
+                "currentHeight": 242,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 104
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "18958624-30f4-48aa-dc92-eebe3e88af7a",
+                    "rows": [
+                        {
+                            "0": 6,
+                            "1": "2025-03-10 00:00:00",
+                            "2": 238.35,
+                            "3": 6,
+                            "4": 6
+                        },
+                        {
+                            "0": 10,
+                            "1": "2025-03-09 00:00:00",
+                            "2": 122.59,
+                            "3": 10,
+                            "4": 10
+                        },
+                        {
+                            "0": 31,
+                            "1": "2025-03-13 00:00:00",
+                            "2": 143.26,
+                            "3": 31,
+                            "4": 1
+                        },
+                        {
+                            "0": 65,
+                            "1": "2025-03-01 00:00:00",
+                            "2": 121.68,
+                            "3": 65,
+                            "4": 5
+                        },
+                        {
+                            "0": 73,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 126.7,
+                            "3": 73,
+                            "4": 3
+                        },
+                        {
+                            "0": 86,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 195.46,
+                            "3": 86,
+                            "4": 6
+                        },
+                        {
+                            "0": 97,
+                            "1": "2025-03-11 00:00:00",
+                            "2": 245.99,
+                            "3": 97,
+                            "4": 7
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": true,
+                            "nullable": false,
+                            "autoIncrement": true
+                        },
+                        {
+                            "title": "date",
+                            "field": "1",
+                            "dataType": {
+                                "type": 26,
+                                "dateTimePrecision": 8,
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": true,
+                            "autoIncrement": false,
+                            "default": null
+                        },
+                        {
+                            "title": "total_price",
+                            "field": "2",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": true,
+                            "autoIncrement": false,
+                            "default": null
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "3",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": true,
+                            "autoIncrement": false,
+                            "default": null
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "4",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": true,
+                            "autoIncrement": false,
+                            "default": null
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 7 records retrieved in 0.563ms"
+                    },
+                    "totalRowCount": 7,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "SELECT *\nFROM order_details\nWHERE MONTH(date) = @target_month\nAND YEAR(date) = @target_year",
+                    "updatable": true,
+                    "fullTableName": "order_details"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 9,
+                "end": 18,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "f56d54fa-789e-4e33-e39e-736e9b414ab2"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 203
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "f56d54fa-789e-4e33-e39e-736e9b414ab2",
+                    "rows": [
+                        {
+                            "0": 6,
+                            "1": "2025-03-10 00:00:00",
+                            "2": 238.35,
+                            "3": 6,
+                            "4": 6
+                        },
+                        {
+                            "0": 10,
+                            "1": "2025-03-09 00:00:00",
+                            "2": 122.59,
+                            "3": 10,
+                            "4": 10
+                        },
+                        {
+                            "0": 31,
+                            "1": "2025-03-13 00:00:00",
+                            "2": 143.26,
+                            "3": 31,
+                            "4": 1
+                        },
+                        {
+                            "0": 65,
+                            "1": "2025-03-01 00:00:00",
+                            "2": 121.68,
+                            "3": 65,
+                            "4": 5
+                        },
+                        {
+                            "0": 73,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 126.7,
+                            "3": 73,
+                            "4": 3
+                        },
+                        {
+                            "0": 86,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 195.46,
+                            "3": 86,
+                            "4": 6
+                        },
+                        {
+                            "0": 97,
+                            "1": "2025-03-11 00:00:00",
+                            "2": 245.99,
+                            "3": 97,
+                            "4": 7
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "date",
+                            "field": "1",
+                            "dataType": {
+                                "type": 26,
+                                "dateTimePrecision": 8,
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_price",
+                            "field": "2",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "3",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "4",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 7 records retrieved in 0.642ms"
+                    },
+                    "totalRowCount": 7,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "WITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    )\n\nSELECT *\nFROM filtered_orders",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 19,
+                "end": 31,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "56080eed-7b79-49b3-87f3-3e9ad0ac316c"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 269
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "56080eed-7b79-49b3-87f3-3e9ad0ac316c",
+                    "rows": [
+                        {
+                            "0": 6,
+                            "1": "2025-03-10 00:00:00",
+                            "2": 238.35,
+                            "3": 6,
+                            "4": 6,
+                            "5": 11,
+                            "6": 69.99,
+                            "7": 3,
+                            "8": 6,
+                            "9": 6
+                        },
+                        {
+                            "0": 6,
+                            "1": "2025-03-10 00:00:00",
+                            "2": 238.35,
+                            "3": 6,
+                            "4": 6,
+                            "5": 12,
+                            "6": 49.99,
+                            "7": 2,
+                            "8": 6,
+                            "9": 16
+                        },
+                        {
+                            "0": 10,
+                            "1": "2025-03-09 00:00:00",
+                            "2": 122.59,
+                            "3": 10,
+                            "4": 10,
+                            "5": 19,
+                            "6": 69.99,
+                            "7": 2,
+                            "8": 10,
+                            "9": 10
+                        },
+                        {
+                            "0": 10,
+                            "1": "2025-03-09 00:00:00",
+                            "2": 122.59,
+                            "3": 10,
+                            "4": 10,
+                            "5": 20,
+                            "6": 59.99,
+                            "7": 1,
+                            "8": 10,
+                            "9": 20
+                        },
+                        {
+                            "0": 31,
+                            "1": "2025-03-13 00:00:00",
+                            "2": 143.26,
+                            "3": 31,
+                            "4": 1,
+                            "5": 61,
+                            "6": 29.99,
+                            "7": 3,
+                            "8": 31,
+                            "9": 1
+                        },
+                        {
+                            "0": 31,
+                            "1": "2025-03-13 00:00:00",
+                            "2": 143.26,
+                            "3": 31,
+                            "4": 1,
+                            "5": 62,
+                            "6": 89.99,
+                            "7": 1,
+                            "8": 31,
+                            "9": 11
+                        },
+                        {
+                            "0": 65,
+                            "1": "2025-03-01 00:00:00",
+                            "2": 121.68,
+                            "3": 65,
+                            "4": 5,
+                            "5": 130,
+                            "6": 19.99,
+                            "7": 3,
+                            "8": 65,
+                            "9": 15
+                        },
+                        {
+                            "0": 65,
+                            "1": "2025-03-01 00:00:00",
+                            "2": 121.68,
+                            "3": 65,
+                            "4": 5,
+                            "5": 131,
+                            "6": 69.99,
+                            "7": 2,
+                            "8": 65,
+                            "9": 17
+                        },
+                        {
+                            "0": 73,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 126.7,
+                            "3": 73,
+                            "4": 3,
+                            "5": 146,
+                            "6": 39.99,
+                            "7": 1,
+                            "8": 73,
+                            "9": 23
+                        },
+                        {
+                            "0": 73,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 126.7,
+                            "3": 73,
+                            "4": 3,
+                            "5": 147,
+                            "6": 49.99,
+                            "7": 2,
+                            "8": 73,
+                            "9": 25
+                        },
+                        {
+                            "0": 86,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 195.46,
+                            "3": 86,
+                            "4": 6,
+                            "5": 172,
+                            "6": 79.99,
+                            "7": 3,
+                            "8": 86,
+                            "9": 36
+                        },
+                        {
+                            "0": 86,
+                            "1": "2025-03-29 00:00:00",
+                            "2": 195.46,
+                            "3": 86,
+                            "4": 6,
+                            "5": 173,
+                            "6": 89.99,
+                            "7": 2,
+                            "8": 86,
+                            "9": 38
+                        },
+                        {
+                            "0": 97,
+                            "1": "2025-03-11 00:00:00",
+                            "2": 245.99,
+                            "3": 97,
+                            "4": 7,
+                            "5": 194,
+                            "6": 79.99,
+                            "7": 3,
+                            "8": 97,
+                            "9": 47
+                        },
+                        {
+                            "0": 97,
+                            "1": "2025-03-11 00:00:00",
+                            "2": 245.99,
+                            "3": 97,
+                            "4": 7,
+                            "5": 195,
+                            "6": 89.99,
+                            "7": 2,
+                            "8": 97,
+                            "9": 49
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "date",
+                            "field": "1",
+                            "dataType": {
+                                "type": 26,
+                                "dateTimePrecision": 8,
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_price",
+                            "field": "2",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "3",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "store_id",
+                            "field": "4",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "id",
+                            "field": "5",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "price",
+                            "field": "6",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "quantity",
+                            "field": "7",
+                            "dataType": {
+                                "type": 4,
+                                "flags": [
+                                    "SIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 10,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INTEGER",
+                                    "INT4"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "order_id",
+                            "field": "8",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "product_id",
+                            "field": "9",
+                            "dataType": {
+                                "type": 5,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 20,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INT8",
+                                    "SERIAL"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 14 records retrieved in 0.706ms"
+                    },
+                    "totalRowCount": 14,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "WITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    )\n\nSELECT *\nFROM filtered_orders fo \nINNER JOIN order_item oi \nON fo.id = oi.order_id\n",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 32,
+                "end": 75,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "804145d4-5c4e-4984-d8ff-6d31126fb74a"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 1307
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1307,
+                            "length": 1
+                        },
+                        "contentStart": 1306,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "804145d4-5c4e-4984-d8ff-6d31126fb74a",
+                    "rows": [
+                        {
+                            "0": "Accessories",
+                            "1": "Samsung T7 Portable SSD",
+                            "2": "2",
+                            "3": 179.98
+                        },
+                        {
+                            "0": "Accessories",
+                            "1": "Sony WH-1000XM4",
+                            "2": "2",
+                            "3": 139.98
+                        },
+                        {
+                            "0": "Home Appliances",
+                            "1": "Instant Pot Pressure Cooker",
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Home Appliances",
+                            "1": "Philips Air Purifier",
+                            "2": "3",
+                            "3": 209.97
+                        },
+                        {
+                            "0": "Home Appliances",
+                            "1": "Samsung Washing Machine",
+                            "2": "3",
+                            "3": 59.97
+                        },
+                        {
+                            "0": "Laptops and Monitors",
+                            "1": "Apple MacBook Air",
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Mobile",
+                            "1": "Galaxy S21",
+                            "2": "3",
+                            "3": 89.97
+                        },
+                        {
+                            "0": "TV and AV",
+                            "1": "Sharp 8K TV",
+                            "2": "1",
+                            "3": 39.99
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 8 records retrieved in 1.551ms"
+                    },
+                    "totalRowCount": 8,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "WITH\n    filtered_orders AS (\n        SELECT *\n            FROM order_details\n            WHERE MONTH(date) = @target_month\n            AND YEAR(date) = @target_year\n    ),\n\n    filtered_orders_expanded AS (\n        SELECT fo.*, oi.price, oi.quantity, oi.product_id, p.category, p.name\n            FROM filtered_orders fo \n            INNER JOIN order_item oi \n            ON fo.id = oi.order_id\n            INNER JOIN product p \n            ON oi.product_id = p.id\n    ),\n\n    sum_by_category_and_product AS (\n        SELECT  category, \n                name, \n                SUM(quantity) as total_quantity_sold, \n                ROUND(SUM(quantity * price),2) as total_sales\n            FROM filtered_orders_expanded \n            GROUP BY category, name\n            ORDER BY category ASC, total_quantity_sold DESC, name ASC\n    ),\n\n    max_quantity_by_category AS (\n        SELECT category, MAX(quantity) as max_quantity\n            FROM filtered_orders_expanded \n            GROUP BY category\n            ORDER BY category\n    ),\n\n    select_top_sellers AS (\n        SELECT bc.*\n        FROM sum_by_category_and_product bc\n        INNER JOIN max_quantity_by_category mq\n        ON bc.category = mq.category\n        WHERE bc.total_quantity_sold = mq.max_quantity\n    )\n\nSELECT * FROM select_top_sellers\n",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 76,
+                "end": 128,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "2e4d0a67-c115-4ca1-9664-d1031d9e65d5",
+                            "content": "OK, 0 records retrieved in 1.388ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": "$$",
+                        "span": {
+                            "start": 0,
+                            "length": 12
+                        },
+                        "contentStart": 0,
+                        "state": 4
+                    },
+                    {
+                        "delimiter": "$$",
+                        "span": {
+                            "start": 12,
+                            "length": 1631
+                        },
+                        "contentStart": 68,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1643,
+                            "length": 13
+                        },
+                        "contentStart": 1645,
+                        "state": 4
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1656,
+                            "length": 1
+                        },
+                        "contentStart": 1655,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 129,
+                "end": 129,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "82063b37-10bc-4839-b671-598c1344cca7"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 46
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 46,
+                            "length": 0
+                        },
+                        "contentStart": 45,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "82063b37-10bc-4839-b671-598c1344cca7",
+                    "rows": [
+                        {
+                            "0": "Accessories",
+                            "1": "Samsung T7 Portable SSD",
+                            "2": "2",
+                            "3": 179.98
+                        },
+                        {
+                            "0": "Accessories",
+                            "1": "Sony WH-1000XM4",
+                            "2": "2",
+                            "3": 139.98
+                        },
+                        {
+                            "0": "Home Appliances",
+                            "1": "Instant Pot Pressure Cooker",
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Home Appliances",
+                            "1": "Philips Air Purifier",
+                            "2": "3",
+                            "3": 209.97
+                        },
+                        {
+                            "0": "Home Appliances",
+                            "1": "Samsung Washing Machine",
+                            "2": "3",
+                            "3": 59.97
+                        },
+                        {
+                            "0": "Laptops and Monitors",
+                            "1": "Apple MacBook Air",
+                            "2": "3",
+                            "3": 239.97
+                        },
+                        {
+                            "0": "Mobile",
+                            "1": "Galaxy S21",
+                            "2": "3",
+                            "3": 89.97
+                        },
+                        {
+                            "0": "TV and AV",
+                            "1": "Sharp 8K TV",
+                            "2": "1",
+                            "3": 39.99
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 8 records retrieved in 2.887ms"
+                    },
+                    "totalRowCount": 8,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "subIndex": 0,
+                    "sql": "CALL GetTopSellingProductsByCategory(3, 2025)",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 130,
+                "end": 130,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "62b27752-fe6e-4519-ec61-a55e6f3fb9b5"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 46
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "62b27752-fe6e-4519-ec61-a55e6f3fb9b5",
+                    "rows": [
+                        {
+                            "0": "Home Appliances",
+                            "1": "Samsung Washing Machine",
+                            "2": "3",
+                            "3": 199.97
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 2.323ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "subIndex": 0,
+                    "sql": "CALL GetTopSellingProductsByCategory(1, 2025)",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 131,
+                "end": 131,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "2c580863-0062-47d2-bc58-ab54ea7fbd86"
+                    ]
+                },
+                "currentHeight": 36,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 46
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "411a864d-3e8b-4401-f852-34b8bc3dab75",
+                    "resultId": "2c580863-0062-47d2-bc58-ab54ea7fbd86",
+                    "rows": [
+                        {
+                            "0": "Home Appliances",
+                            "1": "Philips Air Purifier",
+                            "2": "2",
+                            "3": 119.98
+                        },
+                        {
+                            "0": "Mobile",
+                            "1": "iPad Air",
+                            "2": "1",
+                            "3": 79.99
+                        },
+                        {
+                            "0": "Mobile",
+                            "1": "OnePlus 9 Pro",
+                            "2": "1",
+                            "3": 99.99
+                        },
+                        {
+                            "0": "TV and AV",
+                            "1": "Sony Bravia 4K TV",
+                            "2": "2",
+                            "3": 59.98
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17,
+                                "characterMaximumLength": 65535,
+                                "flags": [
+                                    "BINARY",
+                                    "ASCII",
+                                    "UNICODE"
+                                ],
+                                "needsQuotes": true,
+                                "parameterFormatType": "OneOrZero"
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_quantity_sold",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 65,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrOneOrZero",
+                                "synonyms": [
+                                    "FIXED",
+                                    "NUMERIC",
+                                    "DEC"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        },
+                        {
+                            "title": "total_sales",
+                            "field": "3",
+                            "dataType": {
+                                "type": 9,
+                                "flags": [
+                                    "UNSIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 53,
+                                "numericScale": 30,
+                                "parameterFormatType": "TwoOrZero",
+                                "synonyms": [
+                                    "FLOAT8"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 4 records retrieved in 3.01ms"
+                    },
+                    "totalRowCount": 4,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "subIndex": 0,
+                    "sql": "CALL GetTopSellingProductsByCategory(2, 2025)",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 132,
+                "end": 132,
+                "language": "mysql",
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}
